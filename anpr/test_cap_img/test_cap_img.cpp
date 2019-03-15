@@ -1,20 +1,42 @@
-// test_cap_img.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include "opencv2/opencv.hpp"
 
-int main()
+const cv::String keys = "{img | | Image path}";
+
+cv::String path_img = "";
+cv::Mat img;
+
+int main(int argc, char** argv)
 {
-    std::cout << "Hello World!\n"; 
+    std::cout << "Test capturing an image\n"; 
+
+    // Parse the arguments
+    cv::CommandLineParser parser(argc, argv, keys);
+    if (!parser.has("img"))
+    {
+        std::cout << "[ERR] Missing the argument --img\n";
+        parser.printMessage();
+        return 0;
+    }
+
+    path_img += parser.get<cv::String>("img");
+    if (!parser.check())
+    {
+        parser.printErrors();
+        return 0;
+    }
+
+    // Read the image
+    img = cv::imread(path_img, cv::IMREAD_COLOR);
+    if (img.empty())
+    {
+        std::cout << "[ERR] Cannot read the image: ";
+        std::cout << path_img << std::endl;
+        return 0;
+    }
+    
+    // Display the image
+    cv::imshow("Image", img);
+    cv::waitKey();
+    return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
