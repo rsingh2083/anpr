@@ -8,7 +8,9 @@ cv::Mat img;
 
 // Params
 cv::Size sz_kernel_rect(13, 5); // Assumption: The number plate region is ~3x wider than it is tall.
+cv::Size sz_kernel_square(3, 3);
 cv::Size sz_kernel_gaussian(5, 5);
+double thresh_light = 50;
 
 void revealCandidates(const cv::Mat& img)
 {
@@ -17,8 +19,11 @@ void revealCandidates(const cv::Mat& img)
     cv::Mat img_gray;
     cv::Mat img_blackhat;
     cv::Mat img_gradX;
+    cv::Mat img_light;
     cv::Mat img_thresh;
+
     cv::Mat kernel_rect;
+    cv::Mat kernel_square;
 
     // Convert to grayscale
     cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
@@ -45,6 +50,12 @@ void revealCandidates(const cv::Mat& img)
     cv::erode(img_thresh, img_thresh, cv::Mat(), cv::Point(-1, -1), 2);
     cv::dilate(img_thresh, img_thresh, cv::Mat(), cv::Point(-1, -1), 2);
     imshow("[dbg] thresh-clean", img_thresh);
+
+    // Reveal regions in the image which are light
+    kernel_square = cv::getStructuringElement(cv::MORPH_RECT, sz_kernel_square);
+    cv::morphologyEx(img_gray, img_light, cv::MORPH_CLOSE, kernel_square);
+    cv::threshold(img_light, img_light, thresh_light, 255, cv::THRESH_BINARY);
+    imshow("[dbg] light", img_light);
 }
 
 
