@@ -6,14 +6,25 @@ const cv::String keys = "{img | | Image path}";
 cv::String path_img = "";
 cv::Mat img;
 
+// Params
+cv::Size kernel_size_rect(13, 5); // Assumption: The number plate region is ~3x wider than it is tall.
+
 
 void revealCandidates(const cv::Mat& img)
 {
     CV_Assert(!img.empty() && img.channels() == 3);
 
-    // Convert to grayscale
     cv::Mat img_gray;
+    cv::Mat img_blackhat;
+    cv::Mat kernel_rect;
+
+    // Convert to grayscale
     cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
+
+    // Reveal dark regions against light backgrounds
+    kernel_rect = cv::getStructuringElement(cv::MORPH_RECT, kernel_size_rect);
+    cv::morphologyEx(img_gray, img_blackhat, cv::MORPH_BLACKHAT, kernel_rect);
+    imshow("[dbg] blackhat", img_blackhat);
 }
 
 
