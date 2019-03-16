@@ -16,6 +16,7 @@ void revealCandidates(const cv::Mat& img)
 
     cv::Mat img_gray;
     cv::Mat img_blackhat;
+    cv::Mat img_gradX;
     cv::Mat kernel_rect;
 
     // Convert to grayscale
@@ -25,6 +26,13 @@ void revealCandidates(const cv::Mat& img)
     kernel_rect = cv::getStructuringElement(cv::MORPH_RECT, kernel_size_rect);
     cv::morphologyEx(img_gray, img_blackhat, cv::MORPH_BLACKHAT, kernel_rect);
     imshow("[dbg] blackhat", img_blackhat);
+
+    // Reveal regions which are not only dark against light backgrounds 
+    // but also contain vertical changes in gradient along the x-axis.
+    // 3Å~3 Scharr filter may give more accurate results than the 3Å~3 Sobel
+    cv::Sobel(img_blackhat, img_gradX, CV_32F, 1, 0, cv::FILTER_SCHARR);
+    cv::normalize(cv::abs(img_gradX), img_gradX, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+    imshow("[dbg] gradX", img_gradX);
 }
 
 
