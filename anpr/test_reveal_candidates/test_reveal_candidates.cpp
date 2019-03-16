@@ -6,6 +6,17 @@ const cv::String keys = "{img | | Image path}";
 cv::String path_img = "";
 cv::Mat img;
 
+
+void revealCandidates(const cv::Mat& img)
+{
+    CV_Assert(!img.empty() && img.channels() == 3);
+
+    // Convert to grayscale
+    cv::Mat img_gray;
+    cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
+}
+
+
 int main(int argc, char** argv)
 {
     std::cout << "Test revealing the candidates of number plates\n"; 
@@ -34,6 +45,9 @@ int main(int argc, char** argv)
         std::cout << path_img << std::endl;
         return 0;
     }
+
+    // Reveal the candidates of number plates
+    revealCandidates(img);
 
     // Display the image
     cv::imshow("Image", img);
