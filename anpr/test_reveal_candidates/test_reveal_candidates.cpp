@@ -1,7 +1,9 @@
 #include <iostream>
 #include "opencv2/opencv.hpp"
 
-const cv::String keys = "{img | | Image path}";
+const cv::String keys = 
+"{img  | | Image path               }"
+"{save | | Flag to save output image}";
 
 cv::String path_img = "";
 cv::Mat img;
@@ -97,6 +99,13 @@ int main(int argc, char** argv)
 
     // Reveal the candidates of number plates
     revealCandidates(img, img_candidates);
+    if (parser.has("save"))
+    {
+        cv::String path_in = parser.get<cv::String>("img");
+        cv::String path_out = path_in.substr(0, path_in.size() - 4) + "_candidates.jpg";
+        cv::imwrite(path_out, img_candidates);
+        std::cout << "[INF] Saved " << path_out << std::endl;
+    }
 
     // Display the image
     cv::imshow("Image", img);
