@@ -7,8 +7,8 @@ cv::String path_img = "";
 cv::Mat img;
 
 // Params
-cv::Size kernel_size_rect(13, 5); // Assumption: The number plate region is ~3x wider than it is tall.
-
+cv::Size sz_kernel_rect(13, 5); // Assumption: The number plate region is ~3x wider than it is tall.
+cv::Size sz_kernel_gaussian(5, 5);
 
 void revealCandidates(const cv::Mat& img)
 {
@@ -17,13 +17,14 @@ void revealCandidates(const cv::Mat& img)
     cv::Mat img_gray;
     cv::Mat img_blackhat;
     cv::Mat img_gradX;
+    cv::Mat img_thresh;
     cv::Mat kernel_rect;
 
     // Convert to grayscale
     cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
 
     // Reveal dark regions against light backgrounds
-    kernel_rect = cv::getStructuringElement(cv::MORPH_RECT, kernel_size_rect);
+    kernel_rect = cv::getStructuringElement(cv::MORPH_RECT, sz_kernel_rect);
     cv::morphologyEx(img_gray, img_blackhat, cv::MORPH_BLACKHAT, kernel_rect);
     imshow("[dbg] blackhat", img_blackhat);
 
@@ -33,6 +34,17 @@ void revealCandidates(const cv::Mat& img)
     cv::Sobel(img_blackhat, img_gradX, CV_32F, 1, 0, cv::FILTER_SCHARR);
     cv::normalize(cv::abs(img_gradX), img_gradX, 0, 255, cv::NORM_MINMAX, CV_8UC1);
     imshow("[dbg] gradX", img_gradX);
+
+    // Reveal a "somewhat" rectangular region
+    cv::GaussianBlur(img_gradX, img_gradX, sz_kernel_gaussian, 0);
+    cv::morphologyEx(img_gradX, img_gradX, cv::MORPH_CLOSE, kernel_rect);
+    cv::threshold(img_gradX, img_thresh, 0, 255, cv::THRESH_BINARY|cv::THRESH_OTSU);
+    imshow("[dbg] thresh-original", img_thresh);
+    
+    // Clean up
+    cv::erode(img_thresh, img_thresh, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::dilate(img_thresh, img_thresh, cv::Mat(), cv::Point(-1, -1), 2);
+    imshow("[dbg] thresh-clean", img_thresh);
 }
 
 
