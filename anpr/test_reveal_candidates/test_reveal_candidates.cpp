@@ -5,6 +5,7 @@ const cv::String keys = "{img | | Image path}";
 
 cv::String path_img = "";
 cv::Mat img;
+cv::Mat img_candidates;
 
 // Params
 cv::Size sz_kernel_rect(13, 5); // Assumption: The number plate region is ~3x wider than it is tall.
@@ -12,7 +13,7 @@ cv::Size sz_kernel_square(3, 3);
 cv::Size sz_kernel_gaussian(5, 5);
 double thresh_light = 50;
 
-void revealCandidates(const cv::Mat& img)
+void revealCandidates(const cv::Mat& img, cv::Mat& img_candidates)
 {
     CV_Assert(!img.empty() && img.channels() == 3);
 
@@ -56,6 +57,12 @@ void revealCandidates(const cv::Mat& img)
     cv::morphologyEx(img_gray, img_light, cv::MORPH_CLOSE, kernel_square);
     cv::threshold(img_light, img_light, thresh_light, 255, cv::THRESH_BINARY);
     imshow("[dbg] light", img_light);
+
+    // Reveal the candidates
+    // Remove noise and irrelevant region
+    cv::bitwise_and(img_thresh, img_thresh, img_candidates, img_light);
+    cv::dilate(img_candidates, img_candidates, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::erode(img_candidates, img_candidates, cv::Mat(), cv::Point(-1, -1), 2);
 }
 
 
@@ -89,10 +96,11 @@ int main(int argc, char** argv)
     }
 
     // Reveal the candidates of number plates
-    revealCandidates(img);
+    revealCandidates(img, img_candidates);
 
     // Display the image
     cv::imshow("Image", img);
+    cv::imshow("Candidates", img_candidates);
     cv::waitKey();
     return 0;
 }
