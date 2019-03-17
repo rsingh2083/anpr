@@ -7,7 +7,7 @@ const cv::String keys =
 
 cv::String path_img = "";
 cv::Mat img;
-cv::Mat img_candidates;
+cv::Mat img_thresh;
 
 // Params
 cv::Size sz_kernel_rect(13, 5); // Assumption: The number plate region is ~3x wider than it is tall.
@@ -15,7 +15,7 @@ cv::Size sz_kernel_square(3, 3);
 cv::Size sz_kernel_gaussian(5, 5);
 double thresh_light = 50;
 
-void revealCandidates(const cv::Mat& img, cv::Mat& img_candidates)
+void revealCandidates(const cv::Mat& img, cv::Mat& img_thresh)
 {
     CV_Assert(!img.empty() && img.channels() == 3);
 
@@ -23,7 +23,6 @@ void revealCandidates(const cv::Mat& img, cv::Mat& img_candidates)
     cv::Mat img_blackhat;
     cv::Mat img_gradX;
     cv::Mat img_light;
-    cv::Mat img_thresh;
 
     cv::Mat kernel_rect;
     cv::Mat kernel_square;
@@ -62,9 +61,9 @@ void revealCandidates(const cv::Mat& img, cv::Mat& img_candidates)
 
     // Reveal the candidates
     // Remove noise and irrelevant region
-    cv::bitwise_and(img_thresh, img_thresh, img_candidates, img_light);
-    cv::dilate(img_candidates, img_candidates, cv::Mat(), cv::Point(-1, -1), 2);
-    cv::erode(img_candidates, img_candidates, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::bitwise_and(img_thresh, img_thresh, img_thresh, img_light);
+    cv::dilate(img_thresh, img_thresh, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::erode(img_thresh, img_thresh, cv::Mat(), cv::Point(-1, -1), 2);
 }
 
 
@@ -98,23 +97,20 @@ int main(int argc, char** argv)
     }
 
     // Reveal the candidates of number plates
-    revealCandidates(img, img_candidates);
+    revealCandidates(img, img_thresh);
     if (parser.has("save"))
     {
         cv::String path_in = parser.get<cv::String>("img");
-        //cv::String path_out = path_in.substr(0, path_in.size() - 4) + "_candidates.jpg";
-        //cv::imwrite(path_out, img_candidates);
-        
         cv::String path_out = path_in.substr(0, path_in.size() - 4) + "_thresh.xml";
         cv::FileStorage fs(path_out, cv::FileStorage::WRITE);
-        fs << "img_thresh" << img_candidates;
+        fs << "img_thresh" << img_thresh;
         fs.release();
         std::cout << "[INF] Saved " << path_out << std::endl;
     }
 
     // Display the image
     cv::imshow("Image", img);
-    cv::imshow("Candidates", img_candidates);
+    cv::imshow("Thresholded", img_thresh);
     cv::waitKey();
     return 0;
 }
