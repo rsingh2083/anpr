@@ -102,8 +102,13 @@ int main(int argc, char** argv)
     if (parser.has("save"))
     {
         cv::String path_in = parser.get<cv::String>("img");
-        cv::String path_out = path_in.substr(0, path_in.size() - 4) + "_candidates.jpg";
-        cv::imwrite(path_out, img_candidates);
+        //cv::String path_out = path_in.substr(0, path_in.size() - 4) + "_candidates.jpg";
+        //cv::imwrite(path_out, img_candidates);
+        
+        cv::String path_out = path_in.substr(0, path_in.size() - 4) + "_thresh.xml";
+        cv::FileStorage fs(path_out, cv::FileStorage::WRITE);
+        fs << "img_thresh" << img_candidates;
+        fs.release();
         std::cout << "[INF] Saved " << path_out << std::endl;
     }
 
