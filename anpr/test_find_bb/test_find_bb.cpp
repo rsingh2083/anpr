@@ -11,6 +11,11 @@ cv::String path_img_thresh = "";
 cv::Mat img;
 cv::Mat img_thresh;
 
+void findBoundingBoxes(const cv::Mat& img_thresh)
+{
+    CV_Assert(!img_thresh.empty() && img_thresh.channels() == 1);
+}
+
 int main(int argc, char** argv)
 {
     std::cout << "Test finding the bounding boxes of number plates\n";
@@ -56,6 +61,9 @@ int main(int argc, char** argv)
         }
         return 0;
     }
+
+    // Find the bounding boxes of number plates
+    findBoundingBoxes(img_thresh);
 
     // Display the images
     cv::imshow("Image", img);
