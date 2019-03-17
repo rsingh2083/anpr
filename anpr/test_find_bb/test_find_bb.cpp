@@ -13,7 +13,7 @@ cv::Mat img_thresh;
 
 void findBoundingBoxes(const cv::Mat& img_thresh)
 {
-    CV_Assert(!img_thresh.empty() && img_thresh.channels() == 1);
+    CV_Assert(!img_thresh.empty() && img_thresh.channels() == 1 && img_thresh.type() == CV_8UC1);
 }
 
 int main(int argc, char** argv)
@@ -46,7 +46,9 @@ int main(int argc, char** argv)
 
     // Read the images
     img = cv::imread(path_img, cv::IMREAD_COLOR);
-    img_thresh = cv::imread(path_img_thresh, cv::IMREAD_COLOR); 
+    cv::FileStorage fs(path_img_thresh, cv::FileStorage::READ);
+    fs["img_thresh"] >> img_thresh;
+    fs.release();
     if (img.empty() || img_thresh.empty())
     {
         if (img.empty())
