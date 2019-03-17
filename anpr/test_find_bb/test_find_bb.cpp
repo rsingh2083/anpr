@@ -14,6 +14,11 @@ cv::Mat img_thresh;
 void findBoundingBoxes(const cv::Mat& img_thresh)
 {
     CV_Assert(!img_thresh.empty() && img_thresh.channels() == 1 && img_thresh.type() == CV_8UC1);
+
+    std::vector<std::vector<cv::Point> > cnts;
+
+    // Find contours
+    cv::findContours(img_thresh, cnts, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 }
 
 int main(int argc, char** argv)
